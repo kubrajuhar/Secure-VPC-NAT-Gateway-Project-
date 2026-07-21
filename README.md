@@ -4,16 +4,17 @@ AWS Networking & Secure Subnetting — Portfolio Project
 
 1. Project Overview
 This project demonstrates a foundational AWS networking build: a Virtual Private Cloud (VPC) with clearly separated public and private subnets, a NAT Gateway for secure outbound-only internet access from private resources, and security groups designed using group-to-group referencing rather than static IP ranges.
-The goal was to build and validate every core networking primitive from scratch through the AWS Console, and to document each design decision including trade-offs the way a real production environment would require.\
+The goal was to build and validate every core networking primitive from scratch through the AWS Console, and to document each design decision including trade-offs the way a real production environment would require.
 
-**Objectives**
+Objectives
 •Build a custom VPC with fully isolated public and private subnet tiers across two Availability Zones.
 •Provide private resources with outbound internet access without exposing them to inbound traffic from the internet.
 •Enforce access control using security-group references instead of hardcoded CIDR blocks, for a more scalable and auditable design.
-•Validate the design empirically not just by inspecting configuration, but by proving connectivity and isolation behaviorally.\
+•Validate the design empirically not just by inspecting configuration, but by proving connectivity and isolation behaviorally.
 
 3. Architecture
 The VPC uses a /16 address space, split into four /24 subnets across two Availability Zones two public-facing and two private. Only the public subnets have a route to the Internet Gateway; private subnets route outbound traffic through a NAT Gateway instead.
+
 Network Layout
 Resource	CIDR / Detail	Availability Zone
 VPC (secure-vpc-project)	10.0.0.0/16	—
@@ -27,6 +28,9 @@ Core Components
 •NAT Gateway (secure-vpc-nat) deployed in public-subnet-1 with an automatically-assigned Elastic IP; gives private subnets outbound-only internet access.
 •Route Tables public-rt (0.0.0.0/0 → IGW) associated with both public subnets; private-rt (0.0.0.0/0 → NAT Gateway) associated with both private subnets.
 •Security Groups  public-sg and private-sg (detailed in Section 4).
+
+<img width="1210" height="696" alt="image" src="https://github.com/user-attachments/assets/772b52ca-696f-4a35-a23e-3814d51900db" />
+
 
 High-Level Design -- VPC across two Availability Zones; single NAT Gateway in AZ-1 (with Elastic IP) provides outbound access for both private subnets, including a cross-AZ dependency for private-subnet-2
 Design Trade-off: Single NAT Gateway
