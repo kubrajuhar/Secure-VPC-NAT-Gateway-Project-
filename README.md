@@ -1,12 +1,18 @@
+# Secure-VPC-NAT-Gateway-Project
+
+AWS Networking & Secure Subnetting — Portfolio Project
+
 1. Project Overview
 This project demonstrates a foundational AWS networking build: a Virtual Private Cloud (VPC) with clearly separated public and private subnets, a NAT Gateway for secure outbound-only internet access from private resources, and security groups designed using group-to-group referencing rather than static IP ranges.
-The goal was to build and validate every core networking primitive from scratch through the AWS Console, and to document each design decision including trade-offs the way a real production environment would require.
-Objectives
+The goal was to build and validate every core networking primitive from scratch through the AWS Console, and to document each design decision including trade-offs the way a real production environment would require.\
+
+**Objectives**
 •Build a custom VPC with fully isolated public and private subnet tiers across two Availability Zones.
 •Provide private resources with outbound internet access without exposing them to inbound traffic from the internet.
 •Enforce access control using security-group references instead of hardcoded CIDR blocks, for a more scalable and auditable design.
-•Validate the design empirically not just by inspecting configuration, but by proving connectivity and isolation behaviorally.
-2. Architecture
+•Validate the design empirically not just by inspecting configuration, but by proving connectivity and isolation behaviorally.\
+
+3. Architecture
 The VPC uses a /16 address space, split into four /24 subnets across two Availability Zones two public-facing and two private. Only the public subnets have a route to the Internet Gateway; private subnets route outbound traffic through a NAT Gateway instead.
 Network Layout
 Resource	CIDR / Detail	Availability Zone
@@ -108,4 +114,4 @@ A direct connection attempt from the local machine straight to the private insta
 •Security-group-to-security-group references scale better than CIDR-based rules, since they remain correct even if instances are replaced or IP ranges change.
 •A single-AZ NAT Gateway is an acceptable and common cost trade-off for demo/portfolio environments, but should be called out explicitly rather than presented as a production-grade HA design.
 
-# Secure-VPC-NAT-Gateway-Project-
+
