@@ -1,4 +1,4 @@
-# Secure-VPC-NAT-Gateway-Project
+# AWS Secure-VPC-NAT-Gateway-Project
 
 AWS Networking & Secure Subnetting — Portfolio Project
 
