@@ -78,9 +78,15 @@ private-rt	0.0.0.0/0	secure-vpc-nat (NAT Gateway)
 
 public-rt is associated with public-subnet-1 and public-subnet-2. private-rt is associated with private-subnet-1 and private-subnet-2. This is the step most prone to misconfiguration pointing a private subnet's default route at the Internet Gateway instead of the NAT Gateway would inadvertently expose it.
 
+<img width="1120" height="604" alt="image" src="https://github.com/user-attachments/assets/6bc48eb6-c1cf-411c-967e-f173c2b3fac3" />
+
 Figure 6 -- public-rt associated with 2 subnets, routing 0.0.0.0/0 to the Internet Gateway
 
+<img width="1120" height="622" alt="image" src="https://github.com/user-attachments/assets/d0631ff7-0838-4240-8715-fe755fd660be" />
+
+
 Figure 7 -- private-rt associated with 2 subnets, routing 0.0.0.0/0 to the NAT Gateway
+
 4. Security Groups
 Two security groups were created to enforce a strict boundary between the public and private tiers.
 public-sg
@@ -93,20 +99,30 @@ private-sg
 Type	Protocol / Port	Source
 SSH (and app traffic as needed)	TCP / 22	public-sg (security group reference)
 
+<img width="1120" height="624" alt="image" src="https://github.com/user-attachments/assets/41b601a5-0ed8-47b8-838c-72ca534d39d8" />
 
 Figure 8 -- public-sg created successfully: allows HTTP/HTTPS from internet, SSH from admin IP only
 
+<img width="1120" height="622" alt="image" src="https://github.com/user-attachments/assets/50ab4bd9-8fe7-4f8d-ba5a-f95085c51f8f" />
+
 Figure 9 -- private-sg created successfully: allows traffic only from public-sg, no direct internet exposure
+
 Design Decision: Security-Group Referencing Over CIDR Rules
 private-sg's inbound rule references public-sg directly as its source, rather than allowing a CIDR range such as 10.0.1.0/24. This means any instance carrying the public-sg security group is automatically trusted, regardless of its specific IP address including if instances are replaced, or if an Auto Scaling Group launches new ones. This avoids hard coded IP maintenance and is the pattern used in the three-tier AWS project's security group design as well, reflecting a consistent, production-style approach across both portfolio builds.
+
 5. Testing & Validation
 Two EC2 instances (Amazon Linux 2023, t2.micro) were launched to validate the design empirically:
 •public-test-instance — launched in public-subnet-1, with an auto-assigned public IP and public-sg attached.
 •private-test-instance — launched in private-subnet-1, with no public IP and private-sg attached.
 
+<img width="1120" height="628" alt="image" src="https://github.com/user-attachments/assets/1611085e-ff73-44d8-99cf-fe3d72e62e5b" />
+
 Figure 10 -- public-test-instance running with public IPv4 address 3.239.19.236 and private IP 10.0.1.28
 
+<img width="1120" height="628" alt="image" src="https://github.com/user-attachments/assets/585c2404-f89d-491a-a735-ff2b0b8a10ca" />
+
 Figure 11 -- private-test-instance running with private IP 10.0.11.80 and no public IPv4 address
+
 Connection Method: SSH Agent Forwarding
 Rather than copying the private key (.pem file) onto the public instance to enable the onward hop to the private instance, SSH agent forwarding was used instead. This keeps the private key on the local machine at all times the public instance never has direct access to the key material, which is the more secure approach for a bastion-style hop.
 ssh-add C:\Users\kubra\Downloads\secure-vpc-key.pem
@@ -116,11 +132,17 @@ ssh -A -i C:\Users\kubra\Downloads\secure-vpc-key.pem ec2-user@<public-instance-
 ssh ec2-user@<private-instance-private-IP>
 Evidence
 
+<img width="1000" height="576" alt="image" src="https://github.com/user-attachments/assets/7be1ab42-eed1-4895-a8d6-6d458f1f9c2e" />
+
 Figure 12 -- Successful SSH connection into public-test-instance (Amazon Linux 2023 banner)
 
+<img width="1120" height="766" alt="image" src="https://github.com/user-attachments/assets/17cedba3-94da-4770-8f1f-0a5430d26f3b" />
+
 Figure 13 -- Successful SSH hop from public-test-instance into private-test-instance via agent forwarding
+<img width="1120" height="330" alt="image" src="https://github.com/user-attachments/assets/2d577f13-ad80-47e9-9caa-7aba15f6d271" />
 
 Figure 14 -- curl from private-test-instance returns HTTP/2 200 via the NAT Gateway, confirming outbound internet access
+
 Test Results
 Test	Expected Result	Actual Result
 SSH into public-test-instance from local machine	Connects successfully	Passed — connected, Amazon Linux 2023 banner shown
