@@ -151,6 +151,7 @@ Outbound internet access from private-test-instance	curl to an external HTTPS en
 
 Note on Isolation Testing
 A direct connection attempt from the local machine straight to the private instance's private IP (bypassing the public instance entirely) was identified as a valuable additional test to prove inbound isolation, since private IP addresses are not routable from outside the VPC in any case, and private-sg does not permit any source other than public-sg.
+
 7. Lessons Learned
 •Route table misconfiguration is the most common failure point — a private subnet accidentally routed to the Internet Gateway instead of the NAT Gateway silently defeats the entire isolation design.
 •SSH agent forwarding is a materially better practice than copying private key files onto intermediate (bastion) instances, since it never exposes key material outside the local machine.
