@@ -6,7 +6,7 @@ AWS Networking & Secure Subnetting — Portfolio Project
 This project demonstrates a foundational AWS networking build: a Virtual Private Cloud (VPC) with clearly separated public and private subnets, a NAT Gateway for secure outbound-only internet access from private resources, and security groups designed using group-to-group referencing rather than static IP ranges.
 The goal was to build and validate every core networking primitive from scratch through the AWS Console, and to document each design decision including trade-offs the way a real production environment would require.
 
-Objectives
+2. Objectives
 •Build a custom VPC with fully isolated public and private subnet tiers across two Availability Zones.
 •Provide private resources with outbound internet access without exposing them to inbound traffic from the internet.
 •Enforce access control using security-group references instead of hardcoded CIDR blocks, for a more scalable and auditable design.
@@ -33,25 +33,42 @@ Core Components
 
 
 High-Level Design -- VPC across two Availability Zones; single NAT Gateway in AZ-1 (with Elastic IP) provides outbound access for both private subnets, including a cross-AZ dependency for private-subnet-2
+
 Design Trade-off: Single NAT Gateway
 The NAT Gateway is deployed in only one Availability Zone (us-east-1a) rather than one per AZ. This is a deliberate cost-saving decision for a portfolio/demo build a production environment would typically deploy one NAT Gateway per AZ to avoid a single point of failure for outbound connectivity, at roughly double the hourly cost.
+
 3. Networking Configuration
 VPC & Subnets
 The VPC (secure-vpc-project) was created with a 10.0.0.0/16 CIDR block, no IPv6, and default tenancy. Four subnets were carved out of this range as shown in Section 2, split evenly across two Availability Zones to support a highly-available design pattern even though this project's NAT Gateway itself is single-AZ.
 
+<img width="1120" height="620" alt="image" src="https://github.com/user-attachments/assets/d481e31c-5cf5-40ff-9bbe-6af2e8b1d49a" />
+
 Figure 1 -- secure-vpc-project VPC details in the AWS Console
 
+<img width="1120" height="622" alt="image" src="https://github.com/user-attachments/assets/9e8e1285-0089-47ec-bda3-9a62e0ce17a6" />
+
+
 Figure 2 -- All four subnets (public-subnet-1/2, private-subnet-1/2) listed as Available
+
 Internet Gateway
 secure-vpc-igw was created and attached to the VPC. Without this attachment, no traffic public or private can reach or be reached from the internet, regardless of subnet or route table configuration.
 
+<img width="1120" height="624" alt="image" src="https://github.com/user-attachments/assets/c369ec4f-c68b-40eb-a35d-ad98c3e84ef5" />
+
 Figure 3 -- secure-vpc-igw shown as Attached to secure-vpc-project
+
 NAT Gateway
 secure-vpc-nat was created inside public-subnet-1, using Public connectivity type and automatic Elastic IP allocation. This means private-subnet resources initiate outbound connections that appear to originate from the NAT Gateway's Elastic IP the private instances themselves are never directly addressable from the internet.
 
+<img width="1120" height="622" alt="image" src="https://github.com/user-attachments/assets/5beccca7-99ba-4bc6-8d86-9c1110f364a2" />
+
+
 Figure 4 -- secure-vpc-nat shown as Available, Public connectivity, Regional
 
+<img width="1120" height="624" alt="image" src="https://github.com/user-attachments/assets/79cb7783-3063-43fd-b493-5655c07fdf7f" />
+
 Figure 5 -- Elastic IP allocated and associated with the NAT Gateway
+
 Route Tables
 Route Table	Destination	Target
 public-rt	10.0.0.0/16	local
